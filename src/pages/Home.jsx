@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Star } from 'lucide-react';
+import { ArrowRight, Star, ShoppingCart } from 'lucide-react';
 
 export default function Home() {
     const [products, setProducts] = useState([]);
@@ -65,9 +65,9 @@ export default function Home() {
                         {/* Abstract Coconut Shape Background */}
                         <div className="absolute inset-0 bg-green-50 rounded-l-[50px] md:rounded-l-[100px]"></div>
                         <img
-                            src="https://images.unsplash.com/photo-1596116399002-3694f4205b96?q=80&w=1000&auto=format&fit=crop"
+                            src="/images/hero_bg.png"
                             alt="Fresh Coconuts"
-                            className="absolute inset-0 w-full h-full object-cover mix-blend-multiply opacity-90"
+                            className="absolute inset-0 w-full h-full object-cover mix-blend-multiply opacity-90 rounded-l-[50px] md:rounded-l-[100px]"
                         />
                     </div>
                 </div>
@@ -82,9 +82,9 @@ export default function Home() {
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                     {[
-                        { name: 'Fresh Coconuts', image: 'https://images.unsplash.com/photo-1624823183492-127976e568d4?auto=format&fit=crop&q=80&w=800', link: '/products?category=raw-coconuts' },
-                        { name: 'Virgin Oils', image: 'https://images.unsplash.com/photo-1620803534873-100be64d0483?auto=format&fit=crop&q=80&w=800', link: '/products?category=coconut-oil' },
-                        { name: 'Coir & Crafts', image: 'https://images.unsplash.com/photo-1615486511484-92e172cc416d?auto=format&fit=crop&q=80&w=800', link: '/products?category=coir-products' }
+                        { name: 'Fresh Coconuts', image: '/images/cat_fresh.png', link: '/products?category=raw-coconuts' },
+                        { name: 'Virgin Oils', image: '/images/cat_oil.png', link: '/products?category=coconut-oil' },
+                        { name: 'Coir & Crafts', image: '/images/cat_coir.png', link: '/products?category=coir-products' }
                     ].map((cat, idx) => (
                         <Link key={idx} to={cat.link} className="group relative rounded-2xl overflow-hidden h-80 shadow-md">
                             <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors z-10"></div>
@@ -125,6 +125,7 @@ export default function Home() {
                                         src={product.image_url}
                                         alt={product.name}
                                         className="w-full h-full object-cover mix-blend-multiply group-hover:scale-105 transition-transform duration-500"
+                                        onError={(e) => { e.target.src = '/images/cat_fresh.png'; }} // Fallback if online URL fails
                                     />
                                     {product.stock <= 0 && (
                                         <div className="absolute top-3 left-3 bg-red-500 text-white text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider">
