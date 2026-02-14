@@ -3,6 +3,9 @@ import { supabase } from '../lib/supabaseClient';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Star, ShoppingCart } from 'lucide-react';
 
+// If you have a separate ProductCard component → import it here
+// import ProductCard from './ProductCard';   ← uncomment if exists
+
 export default function Home() {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -19,7 +22,7 @@ export default function Home() {
                 .limit(6);
 
             if (error) {
-                console.error('Error fetching products:', error);
+                console.error('Error fetching featured products:', error);
             } else {
                 setProducts(data || []);
             }
@@ -62,7 +65,6 @@ export default function Home() {
                     </div>
 
                     <div className="w-full md:w-1/2 h-96 md:h-[600px] relative">
-                        {/* Abstract Coconut Shape Background */}
                         <div className="absolute inset-0 bg-green-50 rounded-l-[50px] md:rounded-l-[100px]"></div>
                         <img
                             src="/images/hero_bg.png"
@@ -77,7 +79,9 @@ export default function Home() {
             <section className="container mx-auto px-4">
                 <div className="text-center mb-16">
                     <h2 className="text-3xl font-bold text-coconut-green mb-4">Curated Categories</h2>
-                    <p className="text-gray-500 max-w-2xl mx-auto">Explore our wide range of coconut-based products, processed with care to retain their natural goodness.</p>
+                    <p className="text-gray-500 max-w-2xl mx-auto">
+                        Explore our wide range of coconut-based products, processed with care to retain their natural goodness.
+                    </p>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -88,7 +92,11 @@ export default function Home() {
                     ].map((cat, idx) => (
                         <Link key={idx} to={cat.link} className="group relative rounded-2xl overflow-hidden h-80 shadow-md">
                             <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors z-10"></div>
-                            <img src={cat.image} alt={cat.name} className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                            <img
+                                src={cat.image}
+                                alt={cat.name}
+                                className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                            />
                             <div className="absolute bottom-0 left-0 p-8 z-20">
                                 <h3 className="text-white text-2xl font-bold mb-2">{cat.name}</h3>
                                 <span className="text-white/80 text-sm font-medium flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity transform translate-y-2 group-hover:translate-y-0">
@@ -101,13 +109,16 @@ export default function Home() {
             </section>
 
             {/* Featured Products */}
-            <section className="container mx-auto px-4 bg-white">
+            <section className="container mx-auto px-4">
                 <div className="flex justify-between items-end mb-12">
                     <div>
                         <h2 className="text-3xl font-bold text-coconut-green mb-2">Best Sellers</h2>
                         <p className="text-gray-500">Customer favorites selected just for you.</p>
                     </div>
-                    <Link to="/products" className="hidden md:flex items-center gap-2 text-coconut-green font-bold hover:text-coconut-dark transition-colors">
+                    <Link
+                        to="/products"
+                        className="hidden md:flex items-center gap-2 text-coconut-green font-bold hover:text-coconut-dark transition-colors"
+                    >
                         View All <ArrowRight size={18} />
                     </Link>
                 </div>
@@ -116,42 +127,54 @@ export default function Home() {
                     <div className="text-center py-20">
                         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-coconut-green mx-auto"></div>
                     </div>
+                ) : products.length === 0 ? (
+                    <div className="text-center py-16 text-gray-500">
+                        No featured products available at the moment.
+                    </div>
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
                         {products.map((product) => (
-                            <div key={product.id} className="bg-white rounded-xl border border-gray-100 hover:border-green-200 hover:shadow-xl transition-all duration-300 group overflow-hidden flex flex-col h-full">
+                            <div
+                                key={product.id}
+                                className="bg-white rounded-xl border border-gray-100 hover:border-green-200 hover:shadow-xl transition-all duration-300 group overflow-hidden flex flex-col h-full"
+                            >
                                 <div className="relative aspect-square overflow-hidden bg-gray-50">
-                                    <img
-                                        src={product.image_url}
-                                        alt={product.name}
-                                        className="w-full h-full object-cover mix-blend-multiply group-hover:scale-105 transition-transform duration-500"
-                                        onError={(e) => { e.target.src = '/images/cat_fresh.png'; }} // Fallback if online URL fails
-                                    />
+                                    <Link to={`/product/${product.id}`} className="block w-full h-full">
+                                        <img
+                                            src={product.image_url || '/images/cat_fresh.png'}
+                                            alt={product.name}
+                                            className="w-full h-full object-cover mix-blend-multiply group-hover:scale-105 transition-transform duration-500"
+                                            onError={(e) => {
+                                                e.target.src = '/images/cat_fresh.png';
+                                            }}
+                                        />
+                                    </Link>
                                     {product.stock <= 0 && (
                                         <div className="absolute top-3 left-3 bg-red-500 text-white text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider">
                                             Sold Out
                                         </div>
                                     )}
-                                    <button className="absolute bottom-4 right-4 bg-white/90 backdrop-blur text-coconut-green p-3 rounded-full shadow-sm hover:bg-coconut-green hover:text-white transition-all transform translate-y-12 group-hover:translate-y-0 opacity-0 group-hover:opacity-100">
+
+                                    {/* Quick add to cart button */}
+                                    <button className="absolute bottom-4 right-4 bg-white/90 backdrop-blur text-coconut-green p-3 rounded-full shadow-sm hover:bg-coconut-green hover:text-white transition-all transform translate-y-12 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 z-10">
                                         <ShoppingCart size={18} />
                                     </button>
                                 </div>
 
                                 <div className="p-5 flex flex-col flex-grow">
-                                    <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
-                                        {product.category?.name}
-                                    </div>
-                                    <h3 className="text-lg font-bold text-gray-800 mb-2 group-hover:text-coconut-green transition-colors line-clamp-2">
+                                    <Link to={`/product/${product.id}`} className="font-medium text-gray-800 hover:text-coconut-green transition-colors line-clamp-2 mb-2">
                                         {product.name}
-                                    </h3>
-                                    <div className="flex items-center mb-3">
-                                        <div className="flex text-yellow-400 overflow-hidden text-xs">
-                                            {[...Array(5)].map((_, i) => <Star key={i} size={14} fill="currentColor" />)}
+                                    </Link>
+
+                                    <div className="mt-auto">
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-xl font-bold text-coconut-green">
+                                                ₹{Number(product.price).toFixed(2)}
+                                            </span>
+                                            {product.stock > 0 && (
+                                                <span className="text-sm text-gray-500">{product.stock} left</span>
+                                            )}
                                         </div>
-                                        <span className="text-gray-400 text-xs ml-2">(4.9)</span>
-                                    </div>
-                                    <div className="mt-auto flex items-center justify-between">
-                                        <span className="text-xl font-bold text-gray-900">₹{product.price}</span>
                                     </div>
                                 </div>
                             </div>
@@ -160,7 +183,10 @@ export default function Home() {
                 )}
 
                 <div className="mt-12 text-center md:hidden">
-                    <Link to="/products" className="inline-block bg-white border border-gray-200 text-gray-800 font-bold px-8 py-3 rounded-full hover:bg-gray-50 transition-colors">
+                    <Link
+                        to="/products"
+                        className="inline-block bg-white border border-gray-200 text-gray-800 font-bold px-8 py-3 rounded-full hover:bg-gray-50 transition-colors"
+                    >
                         View All Products
                     </Link>
                 </div>
@@ -172,21 +198,34 @@ export default function Home() {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
                         <div className="p-6">
                             <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center text-coconut-green mx-auto mb-4 shadow-sm">
-                                <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                                <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                </svg>
                             </div>
                             <h3 className="text-lg font-bold text-gray-800 mb-2">100% Quality Guarantee</h3>
                             <p className="text-gray-500 text-sm">Sourced directly from certified organic farms.</p>
                         </div>
+
                         <div className="p-6">
                             <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center text-coconut-green mx-auto mb-4 shadow-sm">
-                                <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                                <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                </svg>
                             </div>
                             <h3 className="text-lg font-bold text-gray-800 mb-2">Fast Delivery</h3>
                             <p className="text-gray-500 text-sm">Fresh products delivered to your doorstep within 24hrs.</p>
                         </div>
+
                         <div className="p-6">
                             <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center text-coconut-green mx-auto mb-4 shadow-sm">
-                                <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+                                <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
+                                    />
+                                </svg>
                             </div>
                             <h3 className="text-lg font-bold text-gray-800 mb-2">Secure Payment</h3>
                             <p className="text-gray-500 text-sm">Multiple secure payment options including UPI & Cards.</p>
