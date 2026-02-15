@@ -32,28 +32,44 @@ export function CartProvider({ children }) {
                 .from('carts')
                 .select('id')
                 .eq('user_id', user.id)
-                .single();
+                .maybeSingle();
 
             if (cartError) {
                 console.log("CartContext: Error fetching cart record:", cartError);
             }
 
-            if (cartError && cartError.code === 'PGRST116') {
+            if (!cartData) {
                 // Cart doesn't exist, create one
                 console.log("CartContext: Cart not found, creating new one...");
                 const { data: newCart, error: createError } = await supabase
                     .from('carts')
-                    .insert([{ user_id: user.id }])
+                    .insert([{ user_id: user.id, user_email: user.email }])
                     .select()
                     .single();
 
                 if (createError) {
-                    console.error("CartContext: Error creating cart:", createError);
-                    throw createError;
+                    if (createError.code === '23505') {
+                        // Cart already exists (Unique constraint violation), retry fetch
+                        console.warn("CartContext: Cart already exists (race condition), retrying fetch...");
+                        const { data: retryCart, error: retryError } = await supabase
+                            .from('carts')
+                            .select('id')
+                            .eq('user_id', user.id)
+                            .maybeSingle();
+
+                        if (retryError || !retryCart) {
+                            console.error("CartContext: Retry failed. Cart exists but is not visible. Check RLS policies.");
+                            // If we can't see it, we can't proceed.
+                        } else {
+                            cartData = retryCart;
+                        }
+                    } else {
+                        console.error("CartContext: Error creating cart:", createError);
+                        throw createError;
+                    }
+                } else {
+                    cartData = newCart;
                 }
-                cartData = newCart;
-            } else if (cartError) {
-                throw cartError;
             }
 
             console.log("CartContext: Cart ID found:", cartData.id);
@@ -98,7 +114,8 @@ export function CartProvider({ children }) {
                 .single();
 
             if (!cartData) {
-                const { data: newCart } = await supabase.from('carts').insert([{ user_id: user.id }]).select().single();
+                console.log("CartContext: addToCart - Creating new cart with email...");
+                const { data: newCart } = await supabase.from('carts').insert([{ user_id: user.id, user_email: user.email }]).select().single();
                 cartData = newCart;
             }
 
