@@ -42,7 +42,7 @@ export default function CheckoutModal({ isOpen, onClose, items, totalAmount, onS
                 .insert([
                     {
                         user_id: user?.id || null, // Link to user if logged in
-                        total: totalAmount,
+                        total_amount: totalAmount,
                         status: 'pending',
                         shipping_address: JSON.stringify({
                             name: orderDetails.name,
@@ -62,7 +62,7 @@ export default function CheckoutModal({ isOpen, onClose, items, totalAmount, onS
                 order_id: orderData.id,
                 product_id: item.product_id || item.product.id, // Handle both cart items and direct product objects
                 quantity: item.quantity,
-                price: item.price || item.product.price // Handle both structures
+                price_at_purchase: item.price || item.product.price // Handle both structures
             }));
 
             const { error: itemError } = await supabase.from('order_items').insert(orderItems);

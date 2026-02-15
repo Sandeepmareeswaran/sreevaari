@@ -1,8 +1,13 @@
+import { Link } from 'react-router-dom';
+import { ShoppingCart, Menu, X, User, Search } from 'lucide-react';
+import { useState } from 'react';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const { cart } = useCart();
+  const { user, signOut } = useAuth();
 
   return (
     <nav className="bg-white shadow-sm sticky top-0 z-50 border-b border-gray-100">
@@ -41,9 +46,20 @@ export default function Navbar() {
                 <span className="absolute -top-2 -right-2 inline-flex items-center justify-center w-5 h-5 text-xs font-bold leading-none text-white bg-coconut-green rounded-full">{cart.length}</span>
               )}
             </Link>
-            <Link to="/login" className="text-gray-400 hover:text-coconut-green transition-colors">
-              <User size={20} />
-            </Link>
+            {user ? (
+              <div className="flex items-center gap-4">
+                <Link to="/orders" className="text-gray-600 hover:text-coconut-green font-medium text-sm hidden lg:block">My Orders</Link>
+                <button onClick={signOut} className="text-gray-400 hover:text-red-500 transition-colors" title="Logout">
+                  <span className="font-medium text-sm mr-2 hidden lg:inline">Logout</span>
+                  <User size={20} className="inline" />
+                </button>
+              </div>
+            ) : (
+              <Link to="/login" className="text-gray-400 hover:text-coconut-green transition-colors" title="Login">
+                <span className="font-medium text-sm mr-2 hidden lg:inline">Sign In</span>
+                <User size={20} className="inline" />
+              </Link>
+            )}
           </div>
 
           {/* Mobile menu button */}
@@ -68,7 +84,14 @@ export default function Navbar() {
             <Link to="/products" className="text-gray-600 hover:text-coconut-green hover:bg-green-50 block px-3 py-2 rounded-md text-base font-medium" onClick={() => setIsOpen(false)}>Products</Link>
             <Link to="/about" className="text-gray-600 hover:text-coconut-green hover:bg-green-50 block px-3 py-2 rounded-md text-base font-medium" onClick={() => setIsOpen(false)}>About Us</Link>
             <Link to="/cart" className="text-gray-600 hover:text-coconut-green hover:bg-green-50 block px-3 py-2 rounded-md text-base font-medium" onClick={() => setIsOpen(false)}>Cart ({cart.length})</Link>
-            <Link to="/login" className="text-gray-600 hover:text-coconut-green hover:bg-green-50 block px-3 py-2 rounded-md text-base font-medium" onClick={() => setIsOpen(false)}>Login</Link>
+            {user ? (
+              <>
+                <Link to="/orders" className="text-gray-600 hover:text-coconut-green hover:bg-green-50 block px-3 py-2 rounded-md text-base font-medium" onClick={() => setIsOpen(false)}>My Orders</Link>
+                <button onClick={() => { signOut(); setIsOpen(false); }} className="w-full text-left text-red-500 hover:bg-red-50 block px-3 py-2 rounded-md text-base font-medium">Logout</button>
+              </>
+            ) : (
+              <Link to="/login" className="text-gray-600 hover:text-coconut-green hover:bg-green-50 block px-3 py-2 rounded-md text-base font-medium" onClick={() => setIsOpen(false)}>Login</Link>
+            )}
           </div>
         </div>
       )}

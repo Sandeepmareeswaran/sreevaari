@@ -6,6 +6,7 @@ import ProductListing from './pages/ProductListing';
 import Cart from './pages/Cart';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
+import Orders from './pages/Orders';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 
@@ -18,15 +19,16 @@ import AdminSettings from './pages/admin/AdminSettings';
 
 function App() {
   return (
-    <AuthProvider>
-      <CartProvider>
-        <Router>
+    <Router>
+      <AuthProvider>
+        <CartProvider>
           <Routes>
             {/* Public Routes */}
             <Route path="/" element={<Layout><Home /></Layout>} />
             <Route path="/product/:id" element={<Layout><ProductDetails /></Layout>} />
             <Route path="/products" element={<Layout><ProductListing /></Layout>} />
             <Route path="/cart" element={<Layout><Cart /></Layout>} />
+            <Route path="/orders" element={<Layout><Orders /></Layout>} />
             <Route path="/login" element={<Layout><Login /></Layout>} />
             <Route path="/signup" element={<Layout><Signup /></Layout>} />
             <Route path="/about" element={<Layout><div className="text-center py-20">About Page Coming Soon</div></Layout>} />
@@ -41,9 +43,9 @@ function App() {
               <Route path="settings" element={<AdminSettings />} />
             </Route>
           </Routes>
-        </Router>
-      </CartProvider>
-    </AuthProvider>
+        </CartProvider>
+      </AuthProvider>
+    </Router>
   );
 }
 

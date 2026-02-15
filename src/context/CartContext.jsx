@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
 import { useAuth } from './AuthContext';
 
@@ -12,12 +13,12 @@ export function CartProvider({ children }) {
 
     // Fetch cart when user changes
     useEffect(() => {
-        if (user) {
+        if (user?.id) {
             fetchCart();
-        } else {
+        } else if (!user) {
             setCart([]); // Clear cart or load from local storage if implementing guest cart later
         }
-    }, [user]);
+    }, [user?.id]);
 
     const fetchCart = async () => {
         if (!user) {
@@ -30,12 +31,27 @@ export function CartProvider({ children }) {
             // 1. Get user's cart
             let { data: cartData, error: cartError } = await supabase
                 .from('carts')
-                .select('id')
+                .select('id, user_email')
                 .eq('user_id', user.id)
                 .maybeSingle();
 
             if (cartError) {
                 console.log("CartContext: Error fetching cart record:", cartError);
+            }
+
+            // Self-healing: Backfill email if missing
+            if (cartData && !cartData.user_email && user.email) {
+                console.log("CartContext: Backfilling user_email for cart:", cartData.id);
+                const { error: updateError } = await supabase
+                    .from('carts')
+                    .update({ user_email: user.email })
+                    .eq('id', cartData.id);
+
+                if (updateError) {
+                    console.error("CartContext: Error backfilling email:", updateError);
+                } else {
+                    cartData.user_email = user.email;
+                }
             }
 
             if (!cartData) {
@@ -96,7 +112,7 @@ export function CartProvider({ children }) {
 
     const addToCart = async (product, quantity = 1) => {
         if (!user) {
-            alert('Please login to add items to cart');
+            navigate('/login');
             return;
         }
 
@@ -129,19 +145,23 @@ export function CartProvider({ children }) {
 
             if (existingItem) {
                 // Update quantity
-                await supabase
+                const { error: updateError } = await supabase
                     .from('cart_items')
                     .update({ quantity: existingItem.quantity + quantity })
                     .eq('id', existingItem.id);
+
+                if (updateError) throw updateError;
             } else {
                 // Insert new item
-                await supabase
+                const { error: insertError } = await supabase
                     .from('cart_items')
                     .insert([{
                         cart_id: cartData.id,
                         product_id: product.id,
                         quantity: quantity
                     }]);
+
+                if (insertError) throw insertError;
             }
 
             await fetchCart(); // Refresh state

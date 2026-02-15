@@ -9,6 +9,7 @@ export default function ProductListing() {
 
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const [categories, setCategories] = useState([]);
     const [activeCategory, setActiveCategory] = useState(categorySlug || 'all');
     const [searchTerm, setSearchTerm] = useState('');
@@ -37,11 +38,13 @@ export default function ProductListing() {
             // For now, let's just fetch all and filter client side if the query is complex
         }
 
-        const { data, error } = await supabase.from('products').select('*, category:categories(name, slug)');
+        const { data, error: fetchError } = await supabase.from('products').select('*, category:categories(name, slug)');
 
-        if (error) {
-            console.error('Error:', error);
+        if (fetchError) {
+            console.error('Error:', fetchError);
+            setError(fetchError.message);
         } else {
+            setError(null);
             let filtered = data || [];
             if (categorySlug) {
                 // Map legacy slugs to IDs or Names if needed, or loosely match
@@ -120,6 +123,11 @@ export default function ProductListing() {
                     {loading ? (
                         <div className="flex justify-center py-20">
                             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-coconut-green"></div>
+                        </div>
+                    ) : error ? (
+                        <div className="text-center py-20 bg-red-50 rounded-xl border border-red-200">
+                            <p className="text-red-500 text-lg mb-2">Error loading products: {error}</p>
+                            <button onClick={() => window.location.reload()} className="text-coconut-green font-bold hover:underline">Retry</button>
                         </div>
                     ) : filteredProducts.length === 0 ? (
                         <div className="text-center py-20 bg-gray-50 rounded-xl border border-dashed border-gray-200">
