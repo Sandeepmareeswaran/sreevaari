@@ -31,7 +31,7 @@ export default function Navbar() {
             <Link to="/" className="text-gray-600 hover:text-coconut-green font-medium transition-colors">Home</Link>
             <Link to="/products" className="text-gray-600 hover:text-coconut-green font-medium transition-colors">Products</Link>
             <Link to="/about" className="text-gray-600 hover:text-coconut-green font-medium transition-colors">About Us</Link>
-            <Link to="/contact" className="text-gray-600 hover:text-coconut-green font-medium transition-colors">Contact</Link>
+            <Link to="/orders" className="text-gray-600 hover:text-coconut-green font-medium transition-colors">My Orders</Link>
           </div>
 
           {/* Icons */}
@@ -47,13 +47,10 @@ export default function Navbar() {
               )}
             </Link>
             {user ? (
-              <div className="flex items-center gap-4">
-                <Link to="/orders" className="text-gray-600 hover:text-coconut-green font-medium text-sm hidden lg:block">My Orders</Link>
-                <button onClick={signOut} className="text-gray-400 hover:text-red-500 transition-colors" title="Logout">
-                  <span className="font-medium text-sm mr-2 hidden lg:inline">Logout</span>
-                  <User size={20} className="inline" />
-                </button>
-              </div>
+              <button onClick={signOut} className="text-gray-400 hover:text-red-500 transition-colors" title="Logout">
+                <span className="font-medium text-sm mr-2 hidden lg:inline">Logout</span>
+                <User size={20} className="inline" />
+              </button>
             ) : (
               <Link to="/login" className="text-gray-400 hover:text-coconut-green transition-colors" title="Login">
                 <span className="font-medium text-sm mr-2 hidden lg:inline">Sign In</span>
@@ -83,12 +80,10 @@ export default function Navbar() {
             <Link to="/" className="text-gray-600 hover:text-coconut-green hover:bg-green-50 block px-3 py-2 rounded-md text-base font-medium" onClick={() => setIsOpen(false)}>Home</Link>
             <Link to="/products" className="text-gray-600 hover:text-coconut-green hover:bg-green-50 block px-3 py-2 rounded-md text-base font-medium" onClick={() => setIsOpen(false)}>Products</Link>
             <Link to="/about" className="text-gray-600 hover:text-coconut-green hover:bg-green-50 block px-3 py-2 rounded-md text-base font-medium" onClick={() => setIsOpen(false)}>About Us</Link>
+            <Link to="/orders" className="text-gray-600 hover:text-coconut-green hover:bg-green-50 block px-3 py-2 rounded-md text-base font-medium" onClick={() => setIsOpen(false)}>My Orders</Link>
             <Link to="/cart" className="text-gray-600 hover:text-coconut-green hover:bg-green-50 block px-3 py-2 rounded-md text-base font-medium" onClick={() => setIsOpen(false)}>Cart ({cart.length})</Link>
             {user ? (
-              <>
-                <Link to="/orders" className="text-gray-600 hover:text-coconut-green hover:bg-green-50 block px-3 py-2 rounded-md text-base font-medium" onClick={() => setIsOpen(false)}>My Orders</Link>
-                <button onClick={() => { signOut(); setIsOpen(false); }} className="w-full text-left text-red-500 hover:bg-red-50 block px-3 py-2 rounded-md text-base font-medium">Logout</button>
-              </>
+              <button onClick={() => { signOut(); setIsOpen(false); }} className="w-full text-left text-red-500 hover:bg-red-50 block px-3 py-2 rounded-md text-base font-medium">Logout</button>
             ) : (
               <Link to="/login" className="text-gray-600 hover:text-coconut-green hover:bg-green-50 block px-3 py-2 rounded-md text-base font-medium" onClick={() => setIsOpen(false)}>Login</Link>
             )}

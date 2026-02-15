@@ -201,8 +201,27 @@ export function CartProvider({ children }) {
     };
 
     const clearCart = async () => {
-        // Logic to clear cart items...
-        // fetchCart();
+        if (!user) return;
+        try {
+            // Get cart ID
+            const { data: cartData } = await supabase
+                .from('carts')
+                .select('id')
+                .eq('user_id', user.id)
+                .single();
+
+            if (cartData) {
+                const { error } = await supabase
+                    .from('cart_items')
+                    .delete()
+                    .eq('cart_id', cartData.id);
+
+                if (error) throw error;
+                setCart([]);
+            }
+        } catch (error) {
+            console.error("Error clearing cart:", error);
+        }
     };
 
     const value = {
@@ -211,6 +230,7 @@ export function CartProvider({ children }) {
         addToCart,
         removeFromCart,
         updateQuantity,
+        clearCart,
         isCartOpen,
         setIsCartOpen,
         cartTotal: cart.reduce((total, item) => total + (item.product.price * item.quantity), 0)
