@@ -2,6 +2,27 @@ import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabaseClient';
 import { Plus, Edit, Trash2, Search, X } from 'lucide-react';
 
+const DEFAULT_CATEGORIES = [
+    { name: 'Raw Coconuts', slug: 'raw-coconuts', description: 'Fresh whole coconuts for daily use.' },
+    { name: 'Tender Coconuts', slug: 'tender-coconuts', description: 'Young green coconuts for drinking and fresh consumption.' },
+    { name: 'Semi Husked Coconuts', slug: 'semi-husked-coconuts', description: 'Semi husked coconuts for wholesale and retail supply.' },
+    { name: 'Copra', slug: 'copra', description: 'Dried coconut kernels used for oil extraction and trade.' },
+    { name: 'Coconut Oil', slug: 'coconut-oil', description: 'Traditional and virgin coconut oil products.' },
+    { name: 'Virgin Coconut Oil', slug: 'virgin-coconut-oil', description: 'Premium cold-processed virgin coconut oil.' },
+    { name: 'Coconut Milk', slug: 'coconut-milk', description: 'Fresh and processed coconut milk products.' },
+    { name: 'Coconut Cream', slug: 'coconut-cream', description: 'Thick coconut cream for cooking and food production.' },
+    { name: 'Desiccated Coconut', slug: 'desiccated-coconut', description: 'Finely shredded and dried coconut products.' },
+    { name: 'Coconut Powder', slug: 'coconut-powder', description: 'Powdered coconut products for food and industrial use.' },
+    { name: 'Coconut Flour', slug: 'coconut-flour', description: 'Gluten-free flour made from coconut solids.' },
+    { name: 'Coconut Sugar', slug: 'coconut-sugar', description: 'Natural sweetener derived from coconut palm sap.' },
+    { name: 'Coconut Shell Products', slug: 'coconut-shell-products', description: 'Bowls, cups, ladles, and shell-based utility products.' },
+    { name: 'Coconut Charcoal', slug: 'coconut-charcoal', description: 'Shell charcoal and activated carbon raw material.' },
+    { name: 'Coconut Fiber', slug: 'coconut-fiber', description: 'Natural coconut fiber for ropes, brushes, and industrial use.' },
+    { name: 'Coir Products', slug: 'coir-products', description: 'Coir ropes, mats, pith, and related by-products.' },
+    { name: 'Coir Pith', slug: 'coir-pith', description: 'Coir pith blocks and grow media products.' },
+    { name: 'Coconut Crafts', slug: 'coconut-crafts', description: 'Decorative and handcrafted coconut-based products.' },
+];
+
 export default function AdminProducts() {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -43,12 +64,31 @@ export default function AdminProducts() {
     const fetchCategories = async () => {
         const { data, error } = await supabase
             .from('categories')
-            .select('id, name');
+            .select('id, name, slug')
+            .order('name', { ascending: true });
 
         if (error) {
             console.error('Error fetching categories:', error);
+            setCategories([]);
         } else {
-            setCategories(data || []);
+            if ((data || []).length > 0) {
+                setCategories(data);
+                return;
+            }
+
+            // Self-heal: if categories are empty, seed default coconut categories.
+            const { data: seededData, error: seedError } = await supabase
+                .from('categories')
+                .upsert(DEFAULT_CATEGORIES, { onConflict: 'slug' })
+                .select('id, name, slug')
+                .order('name', { ascending: true });
+
+            if (seedError) {
+                console.error('Error seeding default categories:', seedError);
+                setCategories([]);
+            } else {
+                setCategories(seededData || []);
+            }
         }
     };
 
@@ -79,6 +119,7 @@ export default function AdminProducts() {
     };
 
     const openAddModal = () => {
+        fetchCategories();
         setEditingProduct(null);
         setFormData({
             name: '',
