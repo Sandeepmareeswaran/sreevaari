@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { supabase } from '../lib/supabaseClient';
 
 export default function Login() {
     const { signIn } = useAuth();
@@ -16,9 +17,21 @@ export default function Login() {
         setLoading(true);
 
         try {
-            const { error } = await signIn(email, password);
+            const { data, error } = await signIn(email, password);
             if (error) throw error;
-            navigate('/'); // Redirect to home on success
+            
+            // Fetch profile to check role
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('role')
+                .eq('id', data.user.id)
+                .single();
+
+            if (profile?.role === 'admin') {
+                navigate('/admin');
+            } else {
+                navigate('/');
+            }
         } catch (err) {
             setError(err.message);
         } finally {
