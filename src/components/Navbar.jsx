@@ -7,7 +7,7 @@ import { useAuth } from '../context/AuthContext';
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const { cart } = useCart();
-  const { user, signOut } = useAuth();
+  const { user, signOut, isAdmin } = useAuth();
 
   return (
     <nav className="bg-white shadow-sm sticky top-0 z-50 border-b border-gray-100">
@@ -32,6 +32,11 @@ export default function Navbar() {
             <Link to="/products" className="text-gray-600 hover:text-coconut-green font-medium transition-colors">Products</Link>
             <Link to="/about" className="text-gray-600 hover:text-coconut-green font-medium transition-colors">About Us</Link>
             <Link to="/orders" className="text-gray-600 hover:text-coconut-green font-medium transition-colors">My Orders</Link>
+            {isAdmin && (
+                <Link to="/admin" className="text-coconut-green font-bold hover:text-coconut-dark transition-colors flex items-center gap-1">
+                    <User size={16} /> Admin Panel
+                </Link>
+            )}
           </div>
 
           {/* Icons */}
@@ -81,6 +86,11 @@ export default function Navbar() {
             <Link to="/products" className="text-gray-600 hover:text-coconut-green hover:bg-green-50 block px-3 py-2 rounded-md text-base font-medium" onClick={() => setIsOpen(false)}>Products</Link>
             <Link to="/about" className="text-gray-600 hover:text-coconut-green hover:bg-green-50 block px-3 py-2 rounded-md text-base font-medium" onClick={() => setIsOpen(false)}>About Us</Link>
             <Link to="/orders" className="text-gray-600 hover:text-coconut-green hover:bg-green-50 block px-3 py-2 rounded-md text-base font-medium" onClick={() => setIsOpen(false)}>My Orders</Link>
+            {isAdmin && (
+                <Link to="/admin" className="text-coconut-green font-bold hover:bg-green-50 block px-3 py-2 rounded-md text-base" onClick={() => setIsOpen(false)}>
+                    Admin Panel
+                </Link>
+            )}
             <Link to="/cart" className="text-gray-600 hover:text-coconut-green hover:bg-green-50 block px-3 py-2 rounded-md text-base font-medium" onClick={() => setIsOpen(false)}>Cart ({cart.length})</Link>
             {user ? (
               <button onClick={() => { signOut(); setIsOpen(false); }} className="w-full text-left text-red-500 hover:bg-red-50 block px-3 py-2 rounded-md text-base font-medium">Logout</button>
